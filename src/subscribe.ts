@@ -1,3 +1,4 @@
+import { responseToError } from '@stop-n-swop/abyss';
 import { Redis } from './cache';
 
 type SubscribeBase = Record<string, any>;
@@ -39,6 +40,29 @@ const makeListener =
     }
   };
 
+const addListenerGroup = (
+  client: Redis,
+  listeners: Record<string, Array<(data: any) => void>>,
+  key: string,
+) => {
+  // eslint-disable-next-line no-param-reassign
+  listeners[key] = [];
+  client.subscribe(key, (message) => {
+    const data = JSON.parse(message);
+    if (data.error) {
+      data.error = responseToError({
+        status: data.error?.status,
+        error: data.error?.body,
+      });
+    }
+    listeners[key]?.forEach((cb) => cb(data));
+  });
+};
+
+const removeListenerGroup = (client: Redis, key: string) => {
+  client.unsubscribe(key);
+};
+
 const addListener = (
   client: Redis,
   listeners: Record<string, Array<(data: any) => void>>,
@@ -46,15 +70,9 @@ const addListener = (
   listener: (data: any) => void,
 ) => {
   if (!listeners[key]) {
-    // eslint-disable-next-line no-param-reassign
-    listeners[key] = [listener];
-    client.subscribe(key, (message) => {
-      const data = JSON.parse(message);
-      listeners[key]?.forEach((cb) => cb(data));
-    });
-  } else {
-    listeners[key].push(listener);
+    addListenerGroup(client, listeners, key);
   }
+  listeners[key].push(listener);
 };
 const removeListener = (
   client: Redis,
@@ -70,7 +88,7 @@ const removeListener = (
     listeners[key].splice(i);
   }
   if (listeners[key].length === 0) {
-    client.unsubscribe(key);
+    removeListenerGroup(client, key);
   }
 };
 

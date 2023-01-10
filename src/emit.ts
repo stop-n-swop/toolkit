@@ -11,6 +11,9 @@ export const makeEmit = <E extends EmitBase>(redis: Redis): EmitType<E> => {
   client.connect();
   return (key, data) => {
     console.debug(`Event [${String(key)}]`);
+    if (data?.error?.toHttpResponse) {
+      data.error = data.error.toHttpResponse();
+    }
     client.publish(key as string, JSON.stringify(data));
   };
 };
