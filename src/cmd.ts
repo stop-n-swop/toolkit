@@ -1,12 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import { Document, Model, Schema } from 'mongoose';
 import { after, t } from '@stop-n-swop/contracts';
+import type { CmdModel } from '@stop-n-swop/models';
 import { nanoid } from 'nanoid';
-import { Database } from './connectDatabase';
-
-export type CmdRecord = { id: string };
-export type CmdDoc = CmdRecord & Document;
-export type CmdModel = Model<CmdRecord>;
 
 export type Cmd = <F extends (...args: any[]) => Promise<any>>(fn: F) => F;
 
@@ -21,16 +16,16 @@ const MAX_TRIES = Math.ceil(MAX_WAIT_TIME / POLL_INTERVAL);
 // Then we poll until our ticket number is at the top of the list
 // We allow the command function to run, then remove our ticket from the list
 export const makeCmd =
-  (model: CmdModel): Cmd =>
+  (Cmd: CmdModel): Cmd =>
   (fn) => {
     return (async (...args: any[]) => {
       // This call's ticket
       const ticket = nanoid(6);
       // Add the ticket to the queue
-      await model.create({ id: ticket, stack: new Error(ticket).stack });
+      await Cmd.create({ id: ticket, stack: new Error(ticket).stack });
       let tries = 0;
       // Get the first item in the queue
-      let current = (await model.findOne().sort({ createdAt: 1 }))?.id;
+      let current = (await Cmd.findOne().sort({ createdAt: 1 }))?.id;
 
       // Poll until we're at the top of the list
       while (current !== ticket) {
@@ -40,13 +35,13 @@ export const makeCmd =
           console.warn(
             `${ticket}: max tries (${MAX_TRIES}) exceeded, stuck on ticket ${current}`,
           );
-          // If current is null then something's gone wrong and the queue is somehow empty!
           if (current == null) {
-            await model.create({ id: ticket });
+            // If current is null then something's gone wrong and the queue is somehow empty!
+            await Cmd.create({ id: ticket });
+          } else {
             // If a request has taken this long, it's probably crashed or died or the server was stopped
             // Delete the ticket from the queue. Sorry ticket.
-          } else {
-            await model.deleteOne({ id: current });
+            await Cmd.deleteOne({ id: current });
           }
           // After attempting to recover, reset the try counter
           tries = 0;
@@ -55,13 +50,13 @@ export const makeCmd =
 
         await after(POLL_INTERVAL);
         // Check what's now at the top of the list
-        current = (await model.findOne().sort({ createdAt: 1 }))?.id;
+        current = (await Cmd.findOne().sort({ createdAt: 1 }))?.id;
       }
 
       // If we get here we've made it to the top of the queue huzzah!
       // We want to try/catch the result because either way, we need to remove the queue item
       const [err, result] = await t(fn(...args));
-      await model.deleteOne({ id: ticket });
+      await Cmd.deleteOne({ id: ticket });
 
       // Pass the result through to the caller
       if (err) {
@@ -70,11 +65,3 @@ export const makeCmd =
       return result;
     }) as any;
   };
-
-export const makeCmdModel = (db: Database) => {
-  const schema = new Schema<CmdRecord>(
-    { id: String, stack: String },
-    { timestamps: true },
-  );
-  return db.model('cmd', schema);
-};

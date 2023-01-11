@@ -6,9 +6,15 @@ type SubscribeBase = Record<string, any>;
 export type Unsubscribe = () => void;
 
 export interface SubscribeType<E extends SubscribeBase> {
+  <K extends keyof E>(key: K, callback: (data: E[K]) => any): Unsubscribe;
   <K extends keyof E>(
     key: K,
     name: string,
+    callback: (data: E[K]) => any,
+  ): Unsubscribe;
+  <K extends keyof E>(
+    key: K,
+    filter: (data: E[K]) => boolean,
     callback: (data: E[K]) => any,
   ): Unsubscribe;
   <K extends keyof E>(
@@ -32,7 +38,7 @@ const makeListener =
         return;
       }
       console.debug(
-        `Triggering subscriber [${name}] for event [${String(key)}]`,
+        `Triggering subscriber [${name}] for event [${key}] (rayId: ${data.rayId})`,
       );
       await callback(data);
     } catch (e) {
@@ -49,6 +55,7 @@ const addListenerGroup = (
   listeners[key] = [];
   client.subscribe(key, (message) => {
     const data = JSON.parse(message);
+    // hydrate errors
     if (data.error) {
       data.error = responseToError({
         status: data.error?.status,
@@ -74,6 +81,7 @@ const addListener = (
   }
   listeners[key].push(listener);
 };
+
 const removeListener = (
   client: Redis,
   listeners: Record<string, Array<(data: any) => void>>,
@@ -99,10 +107,26 @@ export const makeSubscribe = <E extends SubscribeBase>(
   client.connect();
   const listeners: Record<string, Array<(data: any) => void>> = {};
 
-  return (key: string, name: string, ...rest: any[]) => {
+  return (...args: any[]) => {
+    // The first arg is always key
+    const key = args.shift();
+    // The last arg is always callback
+    const callback: (data: any) => any = args.pop();
+
+    // Now we need to work out the args inbetween
+    let filter: (data: any) => boolean = null;
+    let name: string = key;
+
+    while (args.length) {
+      const arg = args.pop();
+      if (typeof arg === 'function') {
+        filter = arg;
+      } else if (typeof arg === 'string') {
+        name = arg;
+      }
+    }
+
     console.debug(`Subscriber for [${String(key)}]`);
-    const callback = rest.pop();
-    const filter = rest.pop();
 
     const listener = makeListener(filter, name, key, callback);
 

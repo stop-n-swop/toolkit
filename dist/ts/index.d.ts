@@ -5,3 +5,4 @@ export * from './emit';
 export * from './logger';
 export * from './subscribe';
 export * from './crypto';
+export * from './watchEmit';

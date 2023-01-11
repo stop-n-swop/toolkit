@@ -3,10 +3,11 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var redis = require('redis');
-var mongoose = require('mongoose');
 var contracts = require('@stop-n-swop/contracts');
 var nanoid = require('nanoid');
+var mongoose = require('mongoose');
 var winston = require('winston');
+var abyss = require('@stop-n-swop/abyss');
 var crypto = require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -87,28 +88,28 @@ const makeRedis = () => {
 const POLL_INTERVAL = 200;
 const MAX_WAIT_TIME = 1000 * 30;
 const MAX_TRIES = Math.ceil(MAX_WAIT_TIME / POLL_INTERVAL);
-const makeCmd = model => fn => {
+const makeCmd = Cmd => fn => {
   return async function () {
-    var _await$model$findOne$;
+    var _await$Cmd$findOne$so;
     const ticket = nanoid.nanoid(6);
-    await model.create({
+    await Cmd.create({
       id: ticket,
       stack: new Error(ticket).stack
     });
     let tries = 0;
-    let current = (_await$model$findOne$ = await model.findOne().sort({
+    let current = (_await$Cmd$findOne$so = await Cmd.findOne().sort({
       createdAt: 1
-    })) == null ? void 0 : _await$model$findOne$.id;
+    })) == null ? void 0 : _await$Cmd$findOne$so.id;
     while (current !== ticket) {
-      var _await$model$findOne$2;
+      var _await$Cmd$findOne$so2;
       if (tries >= MAX_TRIES) {
         console.warn(`${ticket}: max tries (${MAX_TRIES}) exceeded, stuck on ticket ${current}`);
         if (current == null) {
-          await model.create({
+          await Cmd.create({
             id: ticket
           });
         } else {
-          await model.deleteOne({
+          await Cmd.deleteOne({
             id: current
           });
         }
@@ -116,12 +117,12 @@ const makeCmd = model => fn => {
       }
       tries += 1;
       await contracts.after(POLL_INTERVAL);
-      current = (_await$model$findOne$2 = await model.findOne().sort({
+      current = (_await$Cmd$findOne$so2 = await Cmd.findOne().sort({
         createdAt: 1
-      })) == null ? void 0 : _await$model$findOne$2.id;
+      })) == null ? void 0 : _await$Cmd$findOne$so2.id;
     }
     const [err, result] = await contracts.t(fn(...arguments));
-    await model.deleteOne({
+    await Cmd.deleteOne({
       id: ticket
     });
     if (err) {
@@ -129,15 +130,6 @@ const makeCmd = model => fn => {
     }
     return result;
   };
-};
-const makeCmdModel = db => {
-  const schema = new mongoose.Schema({
-    id: String,
-    stack: String
-  }, {
-    timestamps: true
-  });
-  return db.model('cmd', schema);
 };
 
 const connectDatabase = async config => {
@@ -154,13 +146,23 @@ const connectDatabase = async config => {
 const makeEmit = redis => {
   const client = redis.duplicate();
   client.connect();
-  return (key, data) => {
-    console.debug(`Event [${String(key)}]`);
+  return (key, _data) => {
+    var _data$error;
+    const data = {
+      ..._data
+    };
+    if (data != null && (_data$error = data.error) != null && _data$error.toHttpResponse) {
+      data.error = data.error.toHttpResponse();
+    }
+    if (!data.rayId) {
+      data.rayId = nanoid.nanoid(7);
+    }
+    console.debug(`Event [${String(key)}] (rayId ${data.rayId})`);
     client.publish(key, JSON.stringify(data));
   };
 };
 
-const makeLogger = () => {
+const makeLogger = service => {
   if (process.env.NODE_ENV === 'production') {
     const format = winston__default["default"].format.combine(winston__default["default"].format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss:ms'
@@ -174,7 +176,7 @@ const makeLogger = () => {
           level,
           message
         } = _ref;
-        return `user-service: ${level}: ${message}`;
+        return `${service}: ${level}: ${message}`;
       }))
     })];
     const logger = winston__default["default"].createLogger({
@@ -203,23 +205,35 @@ const makeListener = (filter, name, key, callback) => async data => {
     if (filter && filter(data) === false) {
       return;
     }
-    console.debug(`Triggering subscriber [${name}] for event [${String(key)}]`);
+    console.debug(`Triggering subscriber [${name}] for event [${key}] (rayId: ${data.rayId})`);
     await callback(data);
   } catch (e) {
     console.error(e);
   }
 };
+const addListenerGroup = (client, listeners, key) => {
+  listeners[key] = [];
+  client.subscribe(key, message => {
+    var _listeners$key;
+    const data = JSON.parse(message);
+    if (data.error) {
+      var _data$error, _data$error2;
+      data.error = abyss.responseToError({
+        status: (_data$error = data.error) == null ? void 0 : _data$error.status,
+        error: (_data$error2 = data.error) == null ? void 0 : _data$error2.body
+      });
+    }
+    (_listeners$key = listeners[key]) == null ? void 0 : _listeners$key.forEach(cb => cb(data));
+  });
+};
+const removeListenerGroup = (client, key) => {
+  client.unsubscribe(key);
+};
 const addListener = (client, listeners, key, listener) => {
   if (!listeners[key]) {
-    listeners[key] = [listener];
-    client.subscribe(key, message => {
-      var _listeners$key;
-      const data = JSON.parse(message);
-      (_listeners$key = listeners[key]) == null ? void 0 : _listeners$key.forEach(cb => cb(data));
-    });
-  } else {
-    listeners[key].push(listener);
+    addListenerGroup(client, listeners, key);
   }
+  listeners[key].push(listener);
 };
 const removeListener = (client, listeners, key, listener) => {
   if (!listeners[key]) {
@@ -230,20 +244,30 @@ const removeListener = (client, listeners, key, listener) => {
     listeners[key].splice(i);
   }
   if (listeners[key].length === 0) {
-    client.unsubscribe(key);
+    removeListenerGroup(client, key);
   }
 };
 const makeSubscribe = redis => {
   const client = redis.duplicate();
   client.connect();
   const listeners = {};
-  return function (key, name) {
-    console.debug(`Subscriber for [${String(key)}]`);
-    for (var _len = arguments.length, rest = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-      rest[_key - 2] = arguments[_key];
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
-    const callback = rest.pop();
-    const filter = rest.pop();
+    const key = args.shift();
+    const callback = args.pop();
+    let filter = null;
+    let name = key;
+    while (args.length) {
+      const arg = args.pop();
+      if (typeof arg === 'function') {
+        filter = arg;
+      } else if (typeof arg === 'string') {
+        name = arg;
+      }
+    }
+    console.debug(`Subscriber for [${String(key)}]`);
     const listener = makeListener(filter, name, key, callback);
     addListener(client, listeners, key, listener);
     return () => {
@@ -293,12 +317,47 @@ const makeCrypto = config => {
   };
 };
 
+const makeWatchEmit = (subscribe, emit) => _ref => {
+  let {
+    failure,
+    payload,
+    signal,
+    success,
+    timeout = 5000
+  } = _ref;
+  return new Promise((res, rej) => {
+    const name = signal;
+    const rayId = nanoid.nanoid(7);
+    const cancel = () => {
+      u1();
+      u2();
+      clearTimeout(h);
+    };
+    const u1 = subscribe(failure, name, data => data.rayId === rayId, data => {
+      cancel();
+      rej(data);
+    });
+    const u2 = subscribe(success, name, data => data.rayId === rayId, data => {
+      cancel();
+      res(data);
+    });
+    const h = setTimeout(() => {
+      cancel();
+      rej(new abyss.UnknownError('No success/failure message received'));
+    }, timeout);
+    emit(signal, {
+      ...payload,
+      rayId
+    });
+  });
+};
+
 exports.connectDatabase = connectDatabase;
 exports.makeCache = makeCache;
 exports.makeCmd = makeCmd;
-exports.makeCmdModel = makeCmdModel;
 exports.makeCrypto = makeCrypto;
 exports.makeEmit = makeEmit;
 exports.makeLogger = makeLogger;
 exports.makeRedis = makeRedis;
 exports.makeSubscribe = makeSubscribe;
+exports.makeWatchEmit = makeWatchEmit;

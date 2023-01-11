@@ -31,6 +31,7 @@ const configs = {
   external: [
     ...Object.keys(pkg.peerDependencies),
     ...Object.keys(pkg.dependencies),
+    'crypto',
   ],
 };
 

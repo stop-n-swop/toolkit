@@ -1,6 +1,6 @@
 import winston from 'winston';
 
-export const makeLogger = () => {
+export const makeLogger = (service: string) => {
   if (process.env.NODE_ENV === 'production') {
     const format = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
@@ -14,7 +14,7 @@ export const makeLogger = () => {
         format: winston.format.combine(
           winston.format.colorize(),
           winston.format.printf(
-            ({ level, message }) => `user-service: ${level}: ${message}`,
+            ({ level, message }) => `${service}: ${level}: ${message}`,
           ),
         ),
       }),
