@@ -37,6 +37,9 @@
     "@babel/preset-typescript": "^7.13.0",
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
+    "@stop-n-swop/abyss": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#ebe2f2e09922a1fd0e75a2d568f4d016d6268411",
+    "@stop-n-swop/contracts": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#bc5d39456e988ec836288020c70e65bcf5f5c8be",
+    "@stop-n-swop/models": "git+ssh://git@github.com/stop-n-swop/models.git#7e8a49566df9bf702e5ab99acacf9878e21551e0",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^4.21.0",
@@ -72,13 +75,13 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@stop-n-swop/abyss": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#ebe2f2e09922a1fd0e75a2d568f4d016d6268411",
-    "@stop-n-swop/contracts": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#bc5d39456e988ec836288020c70e65bcf5f5c8be",
-    "@stop-n-swop/models": "git+ssh://git@github.com/stop-n-swop/models.git#1a461de0015a0f49670c492c922c32489a15df50",
     "nanoid": "^4.0.0",
     "winston": "^3.8.2"
   },
   "peerDependencies": {
+    "@stop-n-swop/abyss": "*",
+    "@stop-n-swop/contracts": "*",
+    "@stop-n-swop/models": "*",
     "mongoose": "^5.12.13",
     "redis": "^4.5.1"
   }
