@@ -75,7 +75,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "nanoid": "^4.0.0",
+    "nanoid": "^3.1.23",
     "winston": "^3.8.2"
   },
   "peerDependencies": {
