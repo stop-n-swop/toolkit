@@ -1,11 +1,10 @@
 import { type RedisClientType } from 'redis';
 export type Redis = RedisClientType;
-export type Cache = {
-    createKey(...deps: any[]): string;
-    get<T>(key: string): Promise<[value: T, ttl: number]>;
-    set<T>(key: string, value: T): Promise<void>;
-    wrap<F extends (...args: any[]) => Promise<any>>(fn: F): F;
-    flush(...keys: string[]): Promise<void>;
+export type CacheType<E extends Record<string, any>> = {
+    get<K extends keyof E>(key: K, args: Record<string, any>): Promise<[value: E[K], ttl: number]>;
+    set<K extends keyof E>(key: K, args: Record<string, any>, value: E[K]): Promise<void>;
+    withCache<K extends keyof E, F extends () => Promise<any>>(key: K, args: Record<string, any>, fn: F): ReturnType<F>;
+    flush<K extends keyof E>(key: K, ...keys: string[]): Promise<void>;
 };
-export declare const makeCache: (redis: Redis) => Cache;
+export declare const makeCache: <E extends Record<string, any>>(redis: Redis) => CacheType<E>;
 export declare const makeRedis: () => Redis;

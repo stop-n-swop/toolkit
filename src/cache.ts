@@ -2,44 +2,61 @@ import { type RedisClientType, createClient } from 'redis';
 
 export type Redis = RedisClientType;
 
-export type Cache = {
-  createKey(...deps: any[]): string;
-  get<T>(key: string): Promise<[value: T, ttl: number]>;
-  set<T>(key: string, value: T): Promise<void>;
-  wrap<F extends (...args: any[]) => Promise<any>>(fn: F): F;
-  flush(...keys: string[]): Promise<void>;
+export type CacheType<E extends Record<string, any>> = {
+  // createKey<K extends keyof E>(key: K, args: Record<string, any>): string;
+  get<K extends keyof E>(
+    key: K,
+    args: Record<string, any>,
+  ): Promise<[value: E[K], ttl: number]>;
+  set<K extends keyof E>(
+    key: K,
+    args: Record<string, any>,
+    value: E[K],
+  ): Promise<void>;
+  withCache<K extends keyof E, F extends () => Promise<any>>(
+    key: K,
+    args: Record<string, any>,
+    fn: F,
+  ): ReturnType<F>;
+  flush<K extends keyof E>(key: K, ...keys: string[]): Promise<void>;
 };
 
 const CACHE_BUFFER = 60;
 const TTL = 60;
 
-export const makeCache = (redis: Redis): Cache => {
-  const cache: Cache = {
-    createKey(...deps) {
-      return deps
-        .map((x) => {
-          if (typeof x === 'string') {
-            return x;
-          }
-          return JSON.stringify(x);
-        })
-        .join('__');
-    },
-    async get(key) {
-      const str = await redis.get(key);
+const createKey = (...deps: any[]) => {
+  return deps
+    .map((x) => {
+      if (typeof x === 'string') {
+        return x;
+      }
+      return JSON.stringify(x);
+    })
+    .join('__');
+};
+
+export const makeCache = <E extends Record<string, any>>(
+  redis: Redis,
+): CacheType<E> => {
+  const cache: CacheType<E> = {
+    async get(key, args) {
+      const cacheKey = createKey(key, args);
+      const str = await redis.get(cacheKey);
       if (str == null) {
-        return [null, -1];
+        return [undefined, -1];
       }
       const result = JSON.parse(str);
-      const ttl = (await redis.ttl(key)) - CACHE_BUFFER;
+      const ttl = (await redis.ttl(cacheKey)) - CACHE_BUFFER;
 
       return [result, ttl];
     },
-    async set(key, value) {
-      await redis.setEx(key, TTL + CACHE_BUFFER, JSON.stringify(value));
+    async set(key, args, value) {
+      const cacheKey = createKey(key, args);
+      const expires = TTL + CACHE_BUFFER;
+      await redis.setEx(cacheKey, expires, JSON.stringify(value));
     },
     async flush(key, ...search) {
-      const allKeys = await redis.keys(`*${key}*`);
+      const allKeys = await redis.keys(`*${createKey(key)}*`);
       const keys = allKeys.filter((key) => {
         const parts = key.split('__');
         return search.every((s) => parts.some((p) => p.includes(s)));
@@ -48,32 +65,31 @@ export const makeCache = (redis: Redis): Cache => {
         await redis.del(keys);
       }
     },
-    wrap(fn): any {
-      return async (...args: any[]): Promise<any> => {
-        const key = cache.createKey(...args);
+    // @ts-ignore
+    async withCache(key, args, fn) {
+      const cacheKey = createKey(key, args);
 
-        const callAndCache = async () => {
-          const result = await fn(...args);
-          cache.set(key, result);
-          return result;
-        };
-
-        const [value, ttl] = await cache.get(key);
-
-        // Not cached
-        if (value == null) {
-          return callAndCache();
-        }
-
-        // Cached but stale
-        if (ttl < TTL) {
-          callAndCache();
-          return value;
-        }
-
-        // Cached
-        return value;
+      const callAndCache = async () => {
+        const result = await fn();
+        cache.set(cacheKey, args, result);
+        return result;
       };
+
+      const [value, ttl] = await cache.get(cacheKey, args);
+
+      // Not cached
+      if (value === undefined) {
+        return callAndCache();
+      }
+
+      // Stale
+      if (ttl < TTL) {
+        callAndCache();
+        return value;
+      }
+
+      // Cached
+      return value;
     },
   };
 

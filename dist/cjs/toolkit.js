@@ -18,36 +18,39 @@ var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
 
 const CACHE_BUFFER = 60;
 const TTL = 60;
+const createKey = function () {
+  for (var _len = arguments.length, deps = new Array(_len), _key = 0; _key < _len; _key++) {
+    deps[_key] = arguments[_key];
+  }
+  return deps.map(x => {
+    if (typeof x === 'string') {
+      return x;
+    }
+    return JSON.stringify(x);
+  }).join('__');
+};
 const makeCache = redis => {
   const cache = {
-    createKey() {
-      for (var _len = arguments.length, deps = new Array(_len), _key = 0; _key < _len; _key++) {
-        deps[_key] = arguments[_key];
-      }
-      return deps.map(x => {
-        if (typeof x === 'string') {
-          return x;
-        }
-        return JSON.stringify(x);
-      }).join('__');
-    },
-    async get(key) {
-      const str = await redis.get(key);
+    async get(key, args) {
+      const cacheKey = createKey(key, args);
+      const str = await redis.get(cacheKey);
       if (str == null) {
-        return [null, -1];
+        return [undefined, -1];
       }
       const result = JSON.parse(str);
-      const ttl = (await redis.ttl(key)) - CACHE_BUFFER;
+      const ttl = (await redis.ttl(cacheKey)) - CACHE_BUFFER;
       return [result, ttl];
     },
-    async set(key, value) {
-      await redis.setEx(key, TTL + CACHE_BUFFER, JSON.stringify(value));
+    async set(key, args, value) {
+      const cacheKey = createKey(key, args);
+      const expires = TTL + CACHE_BUFFER;
+      await redis.setEx(cacheKey, expires, JSON.stringify(value));
     },
     async flush(key) {
       for (var _len2 = arguments.length, search = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         search[_key2 - 1] = arguments[_key2];
       }
-      const allKeys = await redis.keys(`*${key}*`);
+      const allKeys = await redis.keys(`*${createKey(key)}*`);
       const keys = allKeys.filter(key => {
         const parts = key.split('__');
         return search.every(s => parts.some(p => p.includes(s)));
@@ -56,27 +59,22 @@ const makeCache = redis => {
         await redis.del(keys);
       }
     },
-    wrap(fn) {
-      return async function () {
-        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-          args[_key3] = arguments[_key3];
-        }
-        const key = cache.createKey(...args);
-        const callAndCache = async () => {
-          const result = await fn(...args);
-          cache.set(key, result);
-          return result;
-        };
-        const [value, ttl] = await cache.get(key);
-        if (value == null) {
-          return callAndCache();
-        }
-        if (ttl < TTL) {
-          callAndCache();
-          return value;
-        }
-        return value;
+    async withCache(key, args, fn) {
+      const cacheKey = createKey(key, args);
+      const callAndCache = async () => {
+        const result = await fn();
+        cache.set(cacheKey, args, result);
+        return result;
       };
+      const [value, ttl] = await cache.get(cacheKey, args);
+      if (value === undefined) {
+        return callAndCache();
+      }
+      if (ttl < TTL) {
+        callAndCache();
+        return value;
+      }
+      return value;
     }
   };
   return cache;
