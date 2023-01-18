@@ -315,14 +315,7 @@ const makeCrypto = config => {
   };
 };
 
-const makeWatchEmit = (subscribe, emit) => _ref => {
-  let {
-    failure,
-    payload,
-    signal,
-    success,
-    timeout = 5000
-  } = _ref;
+const makeWatchEmit = (subscribe, emit) => (signal, payload, success, failure) => {
   return new Promise((res, rej) => {
     const name = signal;
     const rayId = nanoid.nanoid(7);
@@ -342,7 +335,7 @@ const makeWatchEmit = (subscribe, emit) => _ref => {
     const h = setTimeout(() => {
       cancel();
       rej(new abyss.UnknownError('No success/failure message received'));
-    }, timeout);
+    }, 10000);
     emit(signal, {
       ...payload,
       rayId

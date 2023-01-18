@@ -10,20 +10,19 @@ export type WatchEmitType<E extends EventBase> = <
   T extends keyof E,
   U extends keyof E,
   V extends keyof E,
->(args: {
-  signal: T;
-  payload: Omit<E[T], 'rayId'>;
-  success: U;
-  failure: V;
-  timeout?: number;
-}) => Promise<E[U]>;
+>(
+  signal: T,
+  payload: Omit<E[T], 'rayId'>,
+  success: U,
+  failure: V,
+) => Promise<E[U]>;
 
 export const makeWatchEmit =
   <E extends EventBase>(
     subscribe: SubscribeType<E>,
     emit: EmitType<E>,
   ): WatchEmitType<E> =>
-  ({ failure, payload, signal, success, timeout = 5000 }) => {
+  (signal, payload, success, failure) => {
     return new Promise((res, rej) => {
       const name = signal as string;
       const rayId = nanoid(7);
@@ -53,7 +52,7 @@ export const makeWatchEmit =
       const h = setTimeout(() => {
         cancel();
         rej(new UnknownError('No success/failure message received'));
-      }, timeout);
+      }, 10000);
 
       emit(signal, { ...payload, rayId } as any);
     });
