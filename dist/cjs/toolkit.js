@@ -320,21 +320,21 @@ const makeWatchEmit = (subscribe, emit) => (signal, payload, success, failure) =
     const name = signal;
     const rayId = nanoid.nanoid(7);
     const cancel = () => {
-      u1();
+      u1 == null ? void 0 : u1();
       u2();
       clearTimeout(h);
     };
-    const u1 = subscribe(failure, name, data => data.rayId === rayId, data => {
+    const u1 = failure ? subscribe(failure, name, data => data.rayId === rayId, data => {
       cancel();
       rej(data);
-    });
+    }) : null;
     const u2 = subscribe(success, name, data => data.rayId === rayId, data => {
       cancel();
       res(data);
     });
     const h = setTimeout(() => {
       cancel();
-      rej(new abyss.UnknownError('No success/failure message received'));
+      rej(new abyss.UnknownError(`No success/failure message received. [${String(signal)}] -> [${String(success)}]/[${String(failure)}]`));
     }, 10000);
     emit(signal, {
       ...payload,

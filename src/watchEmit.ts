@@ -14,7 +14,7 @@ export type WatchEmitType<E extends EventBase> = <
   signal: T,
   payload: Omit<E[T], 'rayId'>,
   success: U,
-  failure: V,
+  failure?: V,
 ) => Promise<E[U]>;
 
 export const makeWatchEmit =
@@ -27,19 +27,21 @@ export const makeWatchEmit =
       const name = signal as string;
       const rayId = nanoid(7);
       const cancel = () => {
-        u1();
+        u1?.();
         u2();
         clearTimeout(h);
       };
-      const u1 = subscribe(
-        failure,
-        name,
-        (data) => data.rayId === rayId,
-        (data) => {
-          cancel();
-          rej(data);
-        },
-      );
+      const u1 = failure
+        ? subscribe(
+            failure,
+            name,
+            (data) => data.rayId === rayId,
+            (data) => {
+              cancel();
+              rej(data);
+            },
+          )
+        : null;
       const u2 = subscribe(
         success,
         name,
@@ -51,7 +53,13 @@ export const makeWatchEmit =
       );
       const h = setTimeout(() => {
         cancel();
-        rej(new UnknownError('No success/failure message received'));
+        rej(
+          new UnknownError(
+            `No success/failure message received. [${String(
+              signal,
+            )}] -> [${String(success)}]/[${String(failure)}]`,
+          ),
+        );
       }, 10000);
 
       emit(signal, { ...payload, rayId } as any);
