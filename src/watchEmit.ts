@@ -24,8 +24,10 @@ export const makeWatchEmit =
   ): WatchEmitType<E> =>
   (signal, payload, success, failure) => {
     return new Promise((res, rej) => {
-      const name = signal as string;
-      const rayId = nanoid(7);
+      const rayId = nanoid();
+      const name = `watchEmit(${String(signal)} -> ${String(success)}/${String(
+        failure,
+      )}) (${rayId})`;
       const cancel = () => {
         u1?.();
         u2();
@@ -62,6 +64,8 @@ export const makeWatchEmit =
         );
       }, 10000);
 
-      emit(signal, { ...payload, rayId } as any);
+      setTimeout(() => {
+        emit(signal, { ...payload, rayId } as any);
+      }, 50);
     });
   };

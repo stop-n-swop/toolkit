@@ -214,25 +214,19 @@ const addListenerGroup = (client, listeners, key) => {
     (_listeners$key = listeners[key]) == null ? void 0 : _listeners$key.forEach(cb => cb(data));
   });
 };
-const removeListenerGroup = (client, key) => {
-  client.unsubscribe(key);
-};
 const addListener = (client, listeners, key, listener) => {
   if (!listeners[key]) {
     addListenerGroup(client, listeners, key);
   }
   listeners[key].push(listener);
 };
-const removeListener = (client, listeners, key, listener) => {
+const removeListener = (listeners, key, listener) => {
   if (!listeners[key]) {
     return;
   }
   const i = listeners[key].indexOf(listener);
   if (i >= 0) {
-    listeners[key].splice(i);
-  }
-  if (listeners[key].length === 0) {
-    removeListenerGroup(client, key);
+    listeners[key].splice(i, 1);
   }
 };
 const makeSubscribe = redis => {
@@ -259,7 +253,7 @@ const makeSubscribe = redis => {
     const listener = makeListener(filter, name, key, callback);
     addListener(client, listeners, key, listener);
     return () => {
-      removeListener(client, listeners, key, listener);
+      removeListener(listeners, key, listener);
     };
   };
 };
@@ -307,8 +301,8 @@ const makeCrypto = config => {
 
 const makeWatchEmit = (subscribe, emit) => (signal, payload, success, failure) => {
   return new Promise((res, rej) => {
-    const name = signal;
-    const rayId = nanoid(7);
+    const rayId = nanoid();
+    const name = `watchEmit(${String(signal)} -> ${String(success)}/${String(failure)}) (${rayId})`;
     const cancel = () => {
       u1 == null ? void 0 : u1();
       u2();
@@ -324,12 +318,14 @@ const makeWatchEmit = (subscribe, emit) => (signal, payload, success, failure) =
     });
     const h = setTimeout(() => {
       cancel();
-      rej(new UnknownError(`No success/failure message received. [${String(signal)}] -> [${String(success)}]/[${String(failure)}]`));
+      rej(new UnknownError(`No success/failure message received. [${String(signal)}] -> [${String(success)}]/[${String(failure)}] (rayId: ${rayId})`));
     }, 10000);
-    emit(signal, {
-      ...payload,
-      rayId
-    });
+    setTimeout(() => {
+      emit(signal, {
+        ...payload,
+        rayId
+      });
+    }, 50);
   });
 };
 
