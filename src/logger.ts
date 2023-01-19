@@ -1,40 +1,40 @@
-import winston from 'winston';
+import { format, createLogger, transports } from 'winston';
 
 export const makeLogger = (service: string) => {
   if (process.env.NODE_ENV === 'production') {
-    const format = winston.format.combine(
-      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-      // winston.format.colorize({ all: true }),
-      winston.format.errors({ stack: true }),
-      winston.format.json(),
+    const logFormat = format.combine(
+      format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+      // format.colorize({ all: true }),
+      format.errors({ stack: true }),
+      format.json(),
     );
 
-    const transports = [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.printf(
+    const logTransports = [
+      new transports.Console({
+        format: format.combine(
+          format.colorize(),
+          format.printf(
             ({ level, message }) => `${service}: ${level}: ${message}`,
           ),
         ),
       }),
     ];
 
-    const logger = winston.createLogger({
+    const logger = createLogger({
       level: 'verbose',
       defaultMeta: {},
-      transports,
+      transports: logTransports,
     });
 
     logger.add(
-      new winston.transports.File({
+      new transports.File({
         filename: 'logs/error.log',
         level: 'error',
-        format,
+        format: logFormat,
       }),
     );
     logger.add(
-      new winston.transports.File({ filename: 'logs/all.log', format }),
+      new transports.File({ filename: 'logs/all.log', format: logFormat }),
     );
 
     console.debug = logger.verbose.bind(logger);
