@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import { after, t } from '@stop-n-swop/contracts';
 import { nanoid } from 'nanoid';
 import mongoose from 'mongoose';
-import winston from 'winston';
+import { format, transports, createLogger } from 'winston';
 import { responseToError, UnknownError } from '@stop-n-swop/abyss';
 import crypto from 'crypto';
 
@@ -152,14 +152,14 @@ const makeEmit = redis => {
 
 const makeLogger = service => {
   if (process.env.NODE_ENV === 'production') {
-    const format = winston.format.combine(winston.format.timestamp({
+    const logFormat = format.combine(format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss:ms'
     }),
-    winston.format.errors({
+    format.errors({
       stack: true
-    }), winston.format.json());
-    const transports = [new winston.transports.Console({
-      format: winston.format.combine(winston.format.colorize(), winston.format.printf(_ref => {
+    }), format.json());
+    const logTransports = [new transports.Console({
+      format: format.combine(format.colorize(), format.printf(_ref => {
         let {
           level,
           message
@@ -167,19 +167,19 @@ const makeLogger = service => {
         return `${service}: ${level}: ${message}`;
       }))
     })];
-    const logger = winston.createLogger({
+    const logger = createLogger({
       level: 'verbose',
       defaultMeta: {},
-      transports
+      transports: logTransports
     });
-    logger.add(new winston.transports.File({
+    logger.add(new transports.File({
       filename: 'logs/error.log',
       level: 'error',
-      format
+      format: logFormat
     }));
-    logger.add(new winston.transports.File({
+    logger.add(new transports.File({
       filename: 'logs/all.log',
-      format
+      format: logFormat
     }));
     console.debug = logger.verbose.bind(logger);
     console.info = logger.info.bind(logger);

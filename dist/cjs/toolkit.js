@@ -13,7 +13,6 @@ var crypto = require('crypto');
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 var mongoose__default = /*#__PURE__*/_interopDefaultLegacy(mongoose);
-var winston__default = /*#__PURE__*/_interopDefaultLegacy(winston);
 var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
 
 const CACHE_BUFFER = 60;
@@ -162,14 +161,14 @@ const makeEmit = redis => {
 
 const makeLogger = service => {
   if (process.env.NODE_ENV === 'production') {
-    const format = winston__default["default"].format.combine(winston__default["default"].format.timestamp({
+    const logFormat = winston.format.combine(winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss:ms'
     }),
-    winston__default["default"].format.errors({
+    winston.format.errors({
       stack: true
-    }), winston__default["default"].format.json());
-    const transports = [new winston__default["default"].transports.Console({
-      format: winston__default["default"].format.combine(winston__default["default"].format.colorize(), winston__default["default"].format.printf(_ref => {
+    }), winston.format.json());
+    const logTransports = [new winston.transports.Console({
+      format: winston.format.combine(winston.format.colorize(), winston.format.printf(_ref => {
         let {
           level,
           message
@@ -177,19 +176,19 @@ const makeLogger = service => {
         return `${service}: ${level}: ${message}`;
       }))
     })];
-    const logger = winston__default["default"].createLogger({
+    const logger = winston.createLogger({
       level: 'verbose',
       defaultMeta: {},
-      transports
+      transports: logTransports
     });
-    logger.add(new winston__default["default"].transports.File({
+    logger.add(new winston.transports.File({
       filename: 'logs/error.log',
       level: 'error',
-      format
+      format: logFormat
     }));
-    logger.add(new winston__default["default"].transports.File({
+    logger.add(new winston.transports.File({
       filename: 'logs/all.log',
-      format
+      format: logFormat
     }));
     console.debug = logger.verbose.bind(logger);
     console.info = logger.info.bind(logger);
