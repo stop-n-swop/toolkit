@@ -9,7 +9,7 @@
       "main"
     ]
   },
-  "version": "0.0.0",
+  "version": "1.0.0",
   "repository": "https://github.com/stop-n-swop/toolkit.git",
   "author": "Jack Ellis",
   "license": "MIT",
@@ -37,9 +37,9 @@
     "@babel/preset-typescript": "^7.13.0",
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
-    "@stop-n-swop/abyss": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#ebe2f2e09922a1fd0e75a2d568f4d016d6268411",
-    "@stop-n-swop/contracts": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#bc5d39456e988ec836288020c70e65bcf5f5c8be",
-    "@stop-n-swop/models": "git+ssh://git@github.com/stop-n-swop/models.git#7e8a49566df9bf702e5ab99acacf9878e21551e0",
+    "@stop-n-swop/abyss": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#v1.3.0",
+    "@stop-n-swop/contracts": "git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#v3.0.0",
+    "@stop-n-swop/models": "git+ssh://git@github.com/stop-n-swop/models.git#v1.0.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^4.21.0",

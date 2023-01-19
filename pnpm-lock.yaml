@@ -9,9 +9,9 @@ specifiers:
   '@babel/preset-typescript': ^7.13.0
   '@commitlint/cli': ^16.0.1
   '@commitlint/config-conventional': ^16.0.0
-  '@stop-n-swop/abyss': git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#ebe2f2e09922a1fd0e75a2d568f4d016d6268411
-  '@stop-n-swop/contracts': git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#bc5d39456e988ec836288020c70e65bcf5f5c8be
-  '@stop-n-swop/models': git+ssh://git@github.com/stop-n-swop/models.git#7e8a49566df9bf702e5ab99acacf9878e21551e0
+  '@stop-n-swop/abyss': git+ssh://git@github.com/stop-n-swop/stop-n-swop-abyss.git#v1.3.0
+  '@stop-n-swop/contracts': git+ssh://git@github.com/stop-n-swop/stop-n-swop-contracts.git#v3.0.0
+  '@stop-n-swop/models': git+ssh://git@github.com/stop-n-swop/models.git#v1.0.0
   '@types/jest': ^27.4.0
   '@types/node': ^18.11.9
   '@typescript-eslint/eslint-plugin': ^4.21.0
@@ -61,9 +61,9 @@ devDependencies:
   '@babel/preset-typescript': 7.18.6_@babel+core@7.20.12
   '@commitlint/cli': 16.3.0
   '@commitlint/config-conventional': 16.2.4
-  '@stop-n-swop/abyss': github.com/stop-n-swop/stop-n-swop-abyss/ebe2f2e09922a1fd0e75a2d568f4d016d6268411
-  '@stop-n-swop/contracts': github.com/stop-n-swop/stop-n-swop-contracts/bc5d39456e988ec836288020c70e65bcf5f5c8be
-  '@stop-n-swop/models': github.com/stop-n-swop/models/7e8a49566df9bf702e5ab99acacf9878e21551e0_3dhspqe6igrnq5dsi6iwz5ztae
+  '@stop-n-swop/abyss': github.com/stop-n-swop/stop-n-swop-abyss/7f1e40d1ddde50d8826759a13eb8703594016cc7
+  '@stop-n-swop/contracts': github.com/stop-n-swop/stop-n-swop-contracts/1f787000f7767a53af820471e82a12f8224117c6
+  '@stop-n-swop/models': github.com/stop-n-swop/models/42a984a7cc7d5c052d6750e93875578db10cebd5_xugtjubxsfevgum2spi4nycd5i
   '@types/jest': 27.5.2
   '@types/node': 18.11.18
   '@typescript-eslint/eslint-plugin': 4.33.0_thyv6urrmcfyirt6hwk42bhgva
@@ -1327,6 +1327,7 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
     requiresBuild: true
+    dev: false
 
   /@commitlint/cli/16.3.0:
     resolution: {integrity: sha512-P+kvONlfsuTMnxSwWE1H+ZcPMY3STFaHb2kAacsqoIkNx66O0T7sTpBxpxkMrFPyhkJiLJnJWMhk4bbvYD3BMA==}
@@ -3087,7 +3088,7 @@ packages:
     dependencies:
       string-width: 4.2.3
     optionalDependencies:
-      '@colors/colors': 1.5.0
+      '@colors/colors': registry.npmjs.org/@colors/colors/1.5.0
     dev: true
 
   /cli-truncate/2.1.0:
@@ -3501,7 +3502,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       globby: 11.1.0
-      graceful-fs: 4.2.10
+      graceful-fs: registry.npmjs.org/graceful-fs/4.2.10
       is-glob: 4.0.3
       is-path-cwd: 2.2.0
       is-path-inside: 3.0.3
@@ -3727,7 +3728,7 @@ packages:
       esutils: 2.0.3
       optionator: 0.8.3
     optionalDependencies:
-      source-map: 0.6.1
+      source-map: registry.npmjs.org/source-map/0.6.1
     dev: true
 
   /eslint-config-airbnb-base/14.2.1_hpmu7kn6tcn2vnxpfzvv33bxmy:
@@ -4498,14 +4499,6 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
 
-  /fsevents/2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /function-bind/1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
     dev: true
@@ -4673,12 +4666,12 @@ packages:
     engines: {node: '>=0.4.7'}
     hasBin: true
     dependencies:
-      minimist: 1.2.7
+      minimist: registry.npmjs.org/minimist/1.2.7
       neo-async: 2.6.2
       source-map: 0.6.1
       wordwrap: 1.0.0
     optionalDependencies:
-      uglify-js: 3.17.4
+      uglify-js: registry.npmjs.org/uglify-js/3.17.4
     dev: true
 
   /hard-rejection/2.1.0:
@@ -5352,7 +5345,7 @@ packages:
       micromatch: 4.0.5
       walker: 1.0.8
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: registry.npmjs.org/fsevents/2.3.2
     dev: true
 
   /jest-jasmine2/27.5.1:
@@ -5753,7 +5746,7 @@ packages:
     dependencies:
       universalify: 2.0.0
     optionalDependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: registry.npmjs.org/graceful-fs/4.2.10
     dev: true
 
   /jsonparse/1.3.1:
@@ -5873,7 +5866,7 @@ packages:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}
     engines: {node: '>=4'}
     dependencies:
-      graceful-fs: 4.2.10
+      graceful-fs: registry.npmjs.org/graceful-fs/4.2.10
       parse-json: 4.0.0
       pify: 3.0.0
       strip-bom: 3.0.0
@@ -6030,7 +6023,7 @@ packages:
     resolution: {integrity: sha512-xTYd4JVHpSCW+aqDof6w/MebaMVNTVYBZhbB/vi513xXdiPT92JMVCo0Jq8W2UZnzYRFeVbQiQ+I25l13JuKvA==}
     hasBin: true
     optionalDependencies:
-      minimist: 1.2.7
+      minimist: registry.npmjs.org/minimist/1.2.7
     dev: true
 
   /makeerror/1.0.12:
@@ -6219,7 +6212,7 @@ packages:
       optional-require: 1.1.8
       safe-buffer: 5.2.1
     optionalDependencies:
-      saslprep: 1.0.3
+      saslprep: registry.npmjs.org/saslprep/1.0.3
     dev: true
 
   /mongoose-legacy-pluralize/1.0.2_mongoose@5.13.15:
@@ -6296,12 +6289,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: false
-
-  /nanoid/4.0.0:
-    resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
-    engines: {node: ^14 || ^16 || >=18}
-    hasBin: true
-    dev: true
 
   /natural-compare/1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -7298,7 +7285,7 @@ packages:
     engines: {node: '>=10.0.0'}
     hasBin: true
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: registry.npmjs.org/fsevents/2.3.2
     dev: true
 
   /run-async/2.4.1:
@@ -7348,15 +7335,6 @@ packages:
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: true
-
-  /saslprep/1.0.3:
-    resolution: {integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      sparse-bitfield: 3.0.3
-    dev: true
-    optional: true
 
   /saxes/5.0.1:
     resolution: {integrity: sha512-5LBh1Tls8c9xgGjw3QrMwETmTMVk0oFgvrFSvWx62llR2hcEInrKNZ2GZCCuuy2lvWrdl5jhbpeqc5hRYKFOcw==}
@@ -8144,19 +8122,6 @@ packages:
     hasBin: true
     dev: true
 
-  /uglify-js/3.17.4:
-    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
-    engines: {node: '>=0.8.0'}
-    hasBin: true
-    requiresBuild: true
-    dev: true
-    optional: true
-
-  /ulid/2.3.0:
-    resolution: {integrity: sha512-keqHubrlpvT6G2wH0OEfSW4mquYRcbe/J8NMmveoQOjUqmo+hXtO+ORCpWhdbZ7k72UtY61BL7haGxW6enBnjw==}
-    hasBin: true
-    dev: true
-
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
     dependencies:
@@ -8598,32 +8563,107 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/stop-n-swop/models/7e8a49566df9bf702e5ab99acacf9878e21551e0_3dhspqe6igrnq5dsi6iwz5ztae:
-    resolution: {commit: 7e8a49566df9bf702e5ab99acacf9878e21551e0, repo: git+ssh://git@github.com/stop-n-swop/models.git, type: git}
-    id: github.com/stop-n-swop/models/7e8a49566df9bf702e5ab99acacf9878e21551e0
+  github.com/stop-n-swop/models/42a984a7cc7d5c052d6750e93875578db10cebd5_xugtjubxsfevgum2spi4nycd5i:
+    resolution: {commit: 42a984a7cc7d5c052d6750e93875578db10cebd5, repo: git+ssh://git@github.com/stop-n-swop/models.git, type: git}
+    id: github.com/stop-n-swop/models/42a984a7cc7d5c052d6750e93875578db10cebd5
     name: '@stop-n-swop/models'
-    version: 0.0.0
+    version: 1.0.0
     peerDependencies:
       '@stop-n-swop/contracts': '*'
       mongoose: ^5.12.13
       redis: ^4.5.1
     dependencies:
-      '@stop-n-swop/contracts': github.com/stop-n-swop/stop-n-swop-contracts/bc5d39456e988ec836288020c70e65bcf5f5c8be
+      '@stop-n-swop/contracts': github.com/stop-n-swop/stop-n-swop-contracts/1f787000f7767a53af820471e82a12f8224117c6
       mongoose: 5.13.15
-      nanoid: 4.0.0
+      nanoid: registry.npmjs.org/nanoid/3.3.4
       redis: 4.5.1
     dev: true
 
-  github.com/stop-n-swop/stop-n-swop-abyss/ebe2f2e09922a1fd0e75a2d568f4d016d6268411:
-    resolution: {tarball: https://codeload.github.com/stop-n-swop/stop-n-swop-abyss/tar.gz/ebe2f2e09922a1fd0e75a2d568f4d016d6268411}
+  github.com/stop-n-swop/stop-n-swop-abyss/7f1e40d1ddde50d8826759a13eb8703594016cc7:
+    resolution: {tarball: https://codeload.github.com/stop-n-swop/stop-n-swop-abyss/tar.gz/7f1e40d1ddde50d8826759a13eb8703594016cc7}
     name: '@stop-n-swop/abyss'
-    version: 0.0.0
+    version: 1.3.0
     dependencies:
-      ulid: 2.3.0
+      ulid: registry.npmjs.org/ulid/2.3.0
     dev: true
 
-  github.com/stop-n-swop/stop-n-swop-contracts/bc5d39456e988ec836288020c70e65bcf5f5c8be:
-    resolution: {tarball: https://codeload.github.com/stop-n-swop/stop-n-swop-contracts/tar.gz/bc5d39456e988ec836288020c70e65bcf5f5c8be}
+  github.com/stop-n-swop/stop-n-swop-contracts/1f787000f7767a53af820471e82a12f8224117c6:
+    resolution: {tarball: https://codeload.github.com/stop-n-swop/stop-n-swop-contracts/tar.gz/1f787000f7767a53af820471e82a12f8224117c6}
     name: '@stop-n-swop/contracts'
-    version: 0.0.0
+    version: 3.0.0
+    dev: true
+
+  registry.npmjs.org/@colors/colors/1.5.0:
+    resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz}
+    name: '@colors/colors'
+    version: 1.5.0
+    engines: {node: '>=0.1.90'}
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  registry.npmjs.org/fsevents/2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz}
+    name: fsevents
+    version: 2.3.2
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  registry.npmjs.org/graceful-fs/4.2.10:
+    resolution: {integrity: sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.10.tgz}
+    name: graceful-fs
+    version: 4.2.10
+    dev: true
+
+  registry.npmjs.org/minimist/1.2.7:
+    resolution: {integrity: sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz}
+    name: minimist
+    version: 1.2.7
+    dev: true
+
+  registry.npmjs.org/nanoid/3.3.4:
+    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/nanoid/-/nanoid-3.3.4.tgz}
+    name: nanoid
+    version: 3.3.4
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+    dev: true
+
+  registry.npmjs.org/saslprep/1.0.3:
+    resolution: {integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/saslprep/-/saslprep-1.0.3.tgz}
+    name: saslprep
+    version: 1.0.3
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      sparse-bitfield: 3.0.3
+    dev: true
+    optional: true
+
+  registry.npmjs.org/source-map/0.6.1:
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz}
+    name: source-map
+    version: 0.6.1
+    engines: {node: '>=0.10.0'}
+    dev: true
+    optional: true
+
+  registry.npmjs.org/uglify-js/3.17.4:
+    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/uglify-js/-/uglify-js-3.17.4.tgz}
+    name: uglify-js
+    version: 3.17.4
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  registry.npmjs.org/ulid/2.3.0:
+    resolution: {integrity: sha512-keqHubrlpvT6G2wH0OEfSW4mquYRcbe/J8NMmveoQOjUqmo+hXtO+ORCpWhdbZ7k72UtY61BL7haGxW6enBnjw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/ulid/-/ulid-2.3.0.tgz}
+    name: ulid
+    version: 2.3.0
+    hasBin: true
     dev: true
