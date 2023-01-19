@@ -57,7 +57,7 @@ export const makeWatchEmit =
           new UnknownError(
             `No success/failure message received. [${String(
               signal,
-            )}] -> [${String(success)}]/[${String(failure)}]`,
+            )}] -> [${String(success)}]/[${String(failure)}] (rayId: ${rayId})`,
           ),
         );
       }, 10000);

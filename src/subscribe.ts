@@ -66,10 +66,6 @@ const addListenerGroup = (
   });
 };
 
-const removeListenerGroup = (client: Redis, key: string) => {
-  client.unsubscribe(key);
-};
-
 const addListener = (
   client: Redis,
   listeners: Record<string, Array<(data: any) => void>>,
@@ -83,7 +79,6 @@ const addListener = (
 };
 
 const removeListener = (
-  client: Redis,
   listeners: Record<string, Array<(data: any) => void>>,
   key: string,
   listener: (data: any) => void,
@@ -93,10 +88,7 @@ const removeListener = (
   }
   const i = listeners[key].indexOf(listener);
   if (i >= 0) {
-    listeners[key].splice(i);
-  }
-  if (listeners[key].length === 0) {
-    removeListenerGroup(client, key);
+    listeners[key].splice(i, 1);
   }
 };
 
@@ -133,7 +125,7 @@ export const makeSubscribe = <E extends SubscribeBase>(
     addListener(client, listeners, key, listener);
 
     return () => {
-      removeListener(client, listeners, key, listener);
+      removeListener(listeners, key, listener);
     };
   };
 };
