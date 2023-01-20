@@ -4,9 +4,10 @@ import { nanoid } from 'nanoid';
 import type { SubscribeType } from './subscribe';
 import type { EmitType } from './emit';
 
-type EventBase = { rayId: string; [key: string]: any };
+type AnyEvent = { rayId: string; [key: string]: any };
+type AnyEvents = Record<string, AnyEvent>;
 
-export type WatchEmitType<E extends EventBase> = <
+export type WatchEmitType<E extends AnyEvents> = <
   T extends keyof E,
   U extends keyof E,
   V extends keyof E,
@@ -18,7 +19,7 @@ export type WatchEmitType<E extends EventBase> = <
 ) => Promise<E[U]>;
 
 export const makeWatchEmit =
-  <E extends EventBase>(
+  <E extends AnyEvents>(
     subscribe: SubscribeType<E>,
     emit: EmitType<E>,
   ): WatchEmitType<E> =>
