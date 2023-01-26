@@ -6,8 +6,8 @@ var redis = require('redis');
 var contracts = require('@stop-n-swop/contracts');
 var nanoid = require('nanoid');
 var mongoose = require('mongoose');
-var winston = require('winston');
 var abyss = require('@stop-n-swop/abyss');
+var winston = require('winston');
 var crypto = require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -140,16 +140,33 @@ const connectDatabase = async config => {
   return connection;
 };
 
+const normalizeError = e => {
+  var _e$details, _e$details$;
+  if (e != null && (_e$details = e.details) != null && (_e$details$ = _e$details[0]) != null && _e$details$.message) {
+    const errors = e.details.reduce((acc, e) => {
+      const key = e.path.join('.');
+      return {
+        ...acc,
+        [key]: e.message
+      };
+    }, {});
+    return new abyss.ValidationError(errors);
+  }
+  if (e instanceof abyss.BaseError) {
+    return e;
+  }
+  console.warn(e);
+  return new abyss.UnknownError(e.message);
+};
 const makeEmit = redis => {
   const client = redis.duplicate();
   client.connect();
   return (key, _data) => {
-    var _data$error;
     const data = {
       ..._data
     };
-    if (data != null && (_data$error = data.error) != null && _data$error.toHttpResponse) {
-      data.error = data.error.toHttpResponse();
+    if (data != null && data.error) {
+      data.error = normalizeError(data.error).toHttpResponse();
     }
     if (!data.rayId) {
       data.rayId = nanoid.nanoid(7);
