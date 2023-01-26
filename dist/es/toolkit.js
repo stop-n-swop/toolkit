@@ -336,7 +336,7 @@ const makeWatchEmit = (subscribe, emit) => (signal, payload, success, failure) =
     const h = setTimeout(() => {
       cancel();
       rej(new UnknownError(`No success/failure message received. [${String(signal)}] -> [${String(success)}]/[${String(failure)}] (rayId: ${rayId})`));
-    }, 10000);
+    }, 30000);
     setTimeout(() => {
       emit(signal, {
         ...payload,

@@ -63,7 +63,7 @@ export const makeWatchEmit =
             )}] -> [${String(success)}]/[${String(failure)}] (rayId: ${rayId})`,
           ),
         );
-      }, 10000);
+      }, 30000);
 
       setTimeout(() => {
         emit(signal, { ...payload, rayId } as any);
