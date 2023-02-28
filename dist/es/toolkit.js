@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import mongoose from 'mongoose';
 import { ValidationError, BaseError, UnknownError, responseToError } from '@stop-n-swop/abyss';
 import { format, transports, createLogger } from 'winston';
+import 'winston-daily-rotate-file';
 import crypto from 'crypto';
 
 const CACHE_BUFFER = 60;
@@ -181,21 +182,27 @@ const makeLogger = service => {
           level,
           message
         } = _ref;
-        return `${service}: ${level}: ${message}`;
+        return `${service}: ${level}: ${JSON.stringify(message)}`;
       }))
     })];
     const logger = createLogger({
       level: 'verbose',
-      defaultMeta: {},
+      defaultMeta: {
+        service
+      },
       transports: logTransports
     });
-    logger.add(new transports.File({
-      filename: 'logs/error.log',
+    logger.add(new transports.DailyRotateFile({
+      filename: 'logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d',
       level: 'error',
       format: logFormat
     }));
-    logger.add(new transports.File({
-      filename: 'logs/all.log',
+    logger.add(new transports.DailyRotateFile({
+      filename: 'logs/all-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d',
       format: logFormat
     }));
     console.debug = logger.verbose.bind(logger);

@@ -1,4 +1,5 @@
 import { format, createLogger, transports } from 'winston';
+import 'winston-daily-rotate-file';
 
 export const makeLogger = (service: string) => {
   if (process.env.NODE_ENV === 'production') {
@@ -14,7 +15,8 @@ export const makeLogger = (service: string) => {
         format: format.combine(
           format.colorize(),
           format.printf(
-            ({ level, message }) => `${service}: ${level}: ${message}`,
+            ({ level, message }) =>
+              `${service}: ${level}: ${JSON.stringify(message)}`,
           ),
         ),
       }),
@@ -22,19 +24,26 @@ export const makeLogger = (service: string) => {
 
     const logger = createLogger({
       level: 'verbose',
-      defaultMeta: {},
+      defaultMeta: { service },
       transports: logTransports,
     });
 
     logger.add(
-      new transports.File({
-        filename: 'logs/error.log',
+      new transports.DailyRotateFile({
+        filename: 'logs/error-%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        maxFiles: '14d',
         level: 'error',
         format: logFormat,
       }),
     );
     logger.add(
-      new transports.File({ filename: 'logs/all.log', format: logFormat }),
+      new transports.DailyRotateFile({
+        filename: 'logs/all-%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        maxFiles: '14d',
+        format: logFormat,
+      }),
     );
 
     console.debug = logger.verbose.bind(logger);

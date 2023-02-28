@@ -9,7 +9,7 @@
       "main"
     ]
   },
-  "version": "1.0.7",
+  "version": "1.1.0",
   "repository": "https://github.com/stop-n-swop/toolkit.git",
   "author": "Jack Ellis",
   "license": "MIT",
@@ -38,8 +38,8 @@
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
     "@stop-n-swop/abyss": "https://github.com/stop-n-swop/stop-n-swop-abyss.git#v1.3.0",
-    "@stop-n-swop/contracts": "https://github.com/stop-n-swop/stop-n-swop-contracts.git#v3.0.0",
-    "@stop-n-swop/models": "https://github.com/stop-n-swop/models.git#v1.0.1",
+    "@stop-n-swop/contracts": "https://github.com/stop-n-swop/stop-n-swop-contracts.git#v5.2.0",
+    "@stop-n-swop/models": "https://github.com/stop-n-swop/models.git#v3.0.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^4.21.0",
@@ -76,7 +76,8 @@
   },
   "dependencies": {
     "nanoid": "^3.1.23",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "peerDependencies": {
     "@stop-n-swop/abyss": "*",

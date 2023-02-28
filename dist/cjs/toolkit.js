@@ -8,6 +8,7 @@ var nanoid = require('nanoid');
 var mongoose = require('mongoose');
 var abyss = require('@stop-n-swop/abyss');
 var winston = require('winston');
+require('winston-daily-rotate-file');
 var crypto = require('crypto');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -190,21 +191,27 @@ const makeLogger = service => {
           level,
           message
         } = _ref;
-        return `${service}: ${level}: ${message}`;
+        return `${service}: ${level}: ${JSON.stringify(message)}`;
       }))
     })];
     const logger = winston.createLogger({
       level: 'verbose',
-      defaultMeta: {},
+      defaultMeta: {
+        service
+      },
       transports: logTransports
     });
-    logger.add(new winston.transports.File({
-      filename: 'logs/error.log',
+    logger.add(new winston.transports.DailyRotateFile({
+      filename: 'logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d',
       level: 'error',
       format: logFormat
     }));
-    logger.add(new winston.transports.File({
-      filename: 'logs/all.log',
+    logger.add(new winston.transports.DailyRotateFile({
+      filename: 'logs/all-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d',
       format: logFormat
     }));
     console.debug = logger.verbose.bind(logger);
